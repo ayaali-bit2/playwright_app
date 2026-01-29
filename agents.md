@@ -4,7 +4,7 @@
 
 `playwright_app` is a sample automated testing project built with Playwright and TypeScript. It demonstrates end-to-end and API testing techniques against web applications.
 
-**Package name:** `playwrite_project`  
+**Package name:** `playwright_app`  
 **Playwright version:** ^1.54.2
 
 ## Project Structure
@@ -17,7 +17,7 @@
 ├── README.md
 ├── playwright.config.ts
 ├── utils
-│   └── global-cofig.ts
+│   └── global-config.ts
 ├── tests
 │   ├── basics.spec.ts
 │   ├── todos.spec.ts
@@ -59,4 +59,4 @@ npx playwright test tests/api.spec.ts
 
 ### Configuration
 
-Tests are configured via `playwright.config.ts`. The test directory is `tests`, with additional examples in `tests-examples`. Global setup is defined in `utils/global-cofig.ts`.
+Tests are configured via `playwright.config.ts`. The test directory is `tests`, with additional examples in `tests-examples`. Global setup is defined in `utils/global-config.ts`.
