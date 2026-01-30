@@ -15,7 +15,7 @@ test.describe('Todo List - Deletion', () => {
         const item = page.locator('[data-testid="todo-item"]').last();
         await expect(item).toBeVisible();
 
-        await item.locator('[data-testid="delete-task"]').click(); // Modify accordingly to your delete button locator
+        await item.locator('[data-testid="delete-task"]').click();
 
         await expect(item).not.toBeVisible();
     });
