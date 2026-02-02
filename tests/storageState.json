@@ -1,0 +1,25 @@
+{
+  "cookies": [
+    {
+      "name": "__Host-session",
+      "value": "<SESSION_TOKEN>",
+      "domain": "todo.qacart.com",
+      "path": "/",
+      "expires": 1924985599,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://todo.qacart.com",
+      "localStorage": [
+        {
+          "name": "auth",
+          "value": "<BASE64_PAYLOAD>"
+        }
+      ]
+    }
+  ]
+}
