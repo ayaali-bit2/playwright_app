@@ -31,12 +31,16 @@ frontend_origins = [
     if origin.strip()
 ]
 session_cookie_name = os.environ.get("FLASK_SESSION_COOKIE_NAME", "session")
-session_cookie_samesite = os.environ.get("FLASK_SESSION_COOKIE_SAMESITE", "None")
-session_cookie_secure = os.environ.get("FLASK_SESSION_COOKIE_SECURE", "False").lower() in {
-    "1",
-    "true",
-    "yes",
-}
+session_cookie_samesite = os.environ.get("FLASK_SESSION_COOKIE_SAMESITE", "Lax")
+session_cookie_secure_env = os.environ.get("FLASK_SESSION_COOKIE_SECURE")
+if session_cookie_secure_env is None:
+    session_cookie_secure = True
+else:
+    session_cookie_secure = session_cookie_secure_env.strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }
 
 app.config.update(
     {
@@ -58,8 +62,6 @@ def login_required(view):
         if not session.get(SESSION_USER_KEY):
             abort(401, description="Authentication is required to access this resource.")
         return view(*args, **kwargs)
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-app.config["SESSION_COOKIE_HTTPONLY"] = True
 
 CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
