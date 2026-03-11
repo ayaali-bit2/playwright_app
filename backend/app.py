@@ -9,6 +9,8 @@ from uuid import uuid4
 from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
 
+from backend.auth.routes import auth_bp
+
 BASE_DIR = Path(__file__).resolve().parent
 DATA_FILE = BASE_DIR / "todos.json"
 DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -16,8 +18,13 @@ DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
 app = Flask(__name__)
+app.secret_key = "vylor-demo-secret"
 app.config["JSON_SORT_KEYS"] = False
-CORS(app)
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+
+CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
 
 def read_todos() -> List[Dict[str, Any]]:
