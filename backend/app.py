@@ -11,6 +11,8 @@ from uuid import uuid4
 from flask import Flask, abort, jsonify, request, session
 from flask_cors import CORS
 
+from backend.auth.routes import auth_bp
+
 BASE_DIR = Path(__file__).resolve().parent
 DATA_FILE = BASE_DIR / "todos.json"
 DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -18,6 +20,7 @@ DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
 app = Flask(__name__)
+app.secret_key = "vylor-demo-secret"
 app.config["JSON_SORT_KEYS"] = False
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-insecure-secret")
 
@@ -55,6 +58,19 @@ def login_required(view):
         if not session.get(SESSION_USER_KEY):
             abort(401, description="Authentication is required to access this resource.")
         return view(*args, **kwargs)
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+
+CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+app.register_blueprint(auth_bp, url_prefix="/api/auth")
+
+
+def require_session(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not session.get("user"):
+            abort(401, description="Authentication required")
+        return func(*args, **kwargs)
 
     return wrapper
 
@@ -114,12 +130,14 @@ def clear_session() -> Any:
 
 @app.route("/api/todos", methods=["GET"])
 @login_required
+@require_session
 def list_todos() -> Any:
     return jsonify(read_todos())
 
 
 @app.route("/api/todos", methods=["POST"])
 @login_required
+@require_session
 def create_todo() -> Any:
     payload = request.get_json(silent=True) or {}
     title = (payload.get("title") or "").strip()
@@ -141,6 +159,7 @@ def create_todo() -> Any:
 
 @app.route("/api/todos/<todo_id>", methods=["PUT"])
 @login_required
+@require_session
 def update_todo(todo_id: str) -> Any:
     payload = request.get_json(silent=True) or {}
     todos = read_todos()
@@ -164,6 +183,7 @@ def update_todo(todo_id: str) -> Any:
 
 @app.route("/api/todos/<todo_id>", methods=["DELETE"])
 @login_required
+@require_session
 def delete_todo(todo_id: str) -> Any:
     todos = read_todos()
     filtered = [item for item in todos if item["id"] != todo_id]
