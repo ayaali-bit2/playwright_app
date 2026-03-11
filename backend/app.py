@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import json
 import logging
+from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List
 from uuid import uuid4
 
-from flask import Flask, abort, jsonify, request
+from flask import Flask, abort, jsonify, request, session
 from flask_cors import CORS
 
 from backend.auth.routes import auth_bp
@@ -25,6 +26,16 @@ app.config["SESSION_COOKIE_HTTPONLY"] = True
 
 CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
+
+
+def require_session(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not session.get("user"):
+            abort(401, description="Authentication required")
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 def read_todos() -> List[Dict[str, Any]]:
@@ -49,11 +60,13 @@ def find_todo(todos: List[Dict[str, Any]], todo_id: str) -> Dict[str, Any] | Non
 
 
 @app.route("/api/todos", methods=["GET"])
+@require_session
 def list_todos() -> Any:
     return jsonify(read_todos())
 
 
 @app.route("/api/todos", methods=["POST"])
+@require_session
 def create_todo() -> Any:
     payload = request.get_json(silent=True) or {}
     title = (payload.get("title") or "").strip()
@@ -74,6 +87,7 @@ def create_todo() -> Any:
 
 
 @app.route("/api/todos/<todo_id>", methods=["PUT"])
+@require_session
 def update_todo(todo_id: str) -> Any:
     payload = request.get_json(silent=True) or {}
     todos = read_todos()
@@ -96,6 +110,7 @@ def update_todo(todo_id: str) -> Any:
 
 
 @app.route("/api/todos/<todo_id>", methods=["DELETE"])
+@require_session
 def delete_todo(todo_id: str) -> Any:
     todos = read_todos()
     filtered = [item for item in todos if item["id"] != todo_id]
