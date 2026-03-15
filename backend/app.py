@@ -13,17 +13,21 @@ from flask_cors import CORS
 
 from backend.auth.routes import auth_bp
 
+# Establish the location where todo data will persist and ensure the folder exists.
 BASE_DIR = Path(__file__).resolve().parent
 DATA_FILE = BASE_DIR / "todos.json"
 DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
 
+# Configure structured logging for easier debugging and monitoring.
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
+# Create the Flask application and configure session handling.
 app = Flask(__name__)
 app.secret_key = "vylor-demo-secret"
 app.config["JSON_SORT_KEYS"] = False
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-insecure-secret")
 
+# Determine which origins are permitted to interact with the backend.
 _default_origins = ["http://localhost:3000", "http://localhost:4173"]
 frontend_origins = [
     origin.strip()
@@ -44,6 +48,7 @@ session_cookie_secure = str(session_cookie_secure_env).lower() in {
 if session_cookie_samesite.lower() == "none":
     session_cookie_secure = True
 
+# Finalize session configuration so cookies are consistent and secure.
 app.config.update(
     {
         "SESSION_COOKIE_NAME": session_cookie_name,
@@ -59,19 +64,28 @@ SESSION_USER_KEY = "user"
 
 
 def login_required(view):
+    """Decorator that enforces authentication before invoking secured routes."""
+
     @wraps(view)
     def wrapper(*args, **kwargs):
         if not session.get(SESSION_USER_KEY):
             abort(401, description="Authentication is required to access this resource.")
         return view(*args, **kwargs)
+
+    return wrapper
+
+# Align explicit session cookie settings with the previously computed values.
 app.config["SESSION_COOKIE_SAMESITE"] = session_cookie_samesite
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 
+# Allow CORS for the API surface explicitly, then mount the authentication blueprint.
 CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
 
 def require_session(func):
+    """Wrapper that confirms a user session exists before executing the handler."""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         if not session.get("user"):
@@ -82,6 +96,8 @@ def require_session(func):
 
 
 def read_todos() -> List[Dict[str, Any]]:
+    """Load the persisted todo list, returning an empty list if the file is absent or invalid."""
+
     if not DATA_FILE.exists():
         return []
 
@@ -94,15 +110,21 @@ def read_todos() -> List[Dict[str, Any]]:
 
 
 def persist_todos(todos: List[Dict[str, Any]]) -> None:
+    """Overwrite the storage file with the latest todo collection."""
+
     with DATA_FILE.open("w", encoding="utf-8") as handle:
         json.dump(todos, handle, indent=2)
 
 
 def find_todo(todos: List[Dict[str, Any]], todo_id: str) -> Dict[str, Any] | None:
+    """Locate a specific todo item by its identifier."""
+
     return next((item for item in todos if item["id"] == todo_id), None)
 
 
 def _resolve_username(payload: Dict[str, Any]) -> str | None:
+    """Extract a normalized username or email from the incoming payload."""
+
     username = payload.get("username") or payload.get("email")
     if username and isinstance(username, str):
         trimmed = username.strip()
@@ -113,6 +135,8 @@ def _resolve_username(payload: Dict[str, Any]) -> str | None:
 
 @app.route("/api/session", methods=["POST"])
 def create_session() -> Any:
+    """Create a lightweight session object when a username is provided."""
+
     payload = request.get_json(silent=True) or {}
     username = _resolve_username(payload)
     if not username:
@@ -125,11 +149,15 @@ def create_session() -> Any:
 
 @app.route("/api/session", methods=["GET"])
 def get_session() -> Any:
+    """Return the current session contents to help clients understand authentication state."""
+
     return jsonify({"user": session.get(SESSION_USER_KEY)})
 
 
 @app.route("/api/session", methods=["DELETE"])
 def clear_session() -> Any:
+    """Explicitly remove the session so the client can start a fresh login."""
+
     session.pop(SESSION_USER_KEY, None)
     return jsonify({"message": "Session cleared."})
 
@@ -138,6 +166,8 @@ def clear_session() -> Any:
 @login_required
 @require_session
 def list_todos() -> Any:
+    """Retrieve all todo items for the authenticated user."""
+
     return jsonify(read_todos())
 
 
@@ -145,6 +175,8 @@ def list_todos() -> Any:
 @login_required
 @require_session
 def create_todo() -> Any:
+    """Persist a new todo item after validating the provided title."""
+
     payload = request.get_json(silent=True) or {}
     title = (payload.get("title") or "").strip()
     if not title:
@@ -167,6 +199,8 @@ def create_todo() -> Any:
 @login_required
 @require_session
 def update_todo(todo_id: str) -> Any:
+    """Update the requested todo item after validating the requested changes."""
+
     payload = request.get_json(silent=True) or {}
     todos = read_todos()
     todo = find_todo(todos, todo_id)
@@ -191,6 +225,8 @@ def update_todo(todo_id: str) -> Any:
 @login_required
 @require_session
 def delete_todo(todo_id: str) -> Any:
+    """Remove the specified todo item if it exists."""
+
     todos = read_todos()
     filtered = [item for item in todos if item["id"] != todo_id]
     if len(filtered) == len(todos):
@@ -201,4 +237,5 @@ def delete_todo(todo_id: str) -> Any:
 
 
 if __name__ == "__main__":
+    # Launch the Flask application when executed directly.
     app.run(host="0.0.0.0", port=5000)

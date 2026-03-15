@@ -363,15 +363,20 @@
       import React, { useCallback, useEffect, useMemo, useState } from 'https://esm.sh/react@18.2.0';
       import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
 
+      // Determine which backend API to target, defaulting to localhost when the env variable is absent.
       const API_BASE = window.REACT_APP_API_BASE ?? 'http://localhost:5000/api';
+      // Available filters for toggling the todo list view.
       const FILTERS = ['all', 'active', 'completed'];
+      // Human-friendly labels corresponding to each filter option.
       const FILTER_LABELS = {
         all: 'All tasks',
         active: 'Active',
         completed: 'Completed',
       };
+      // Reusable payload that resets the task form fields after saves or cancellations.
       const DEFAULT_FORM = { title: '', description: '' };
 
+      // Parse JSON safely while handling responses that may not include a valid body.
       const parseJson = async (response) => {
         try {
           return await response.json();
@@ -380,6 +385,7 @@
         }
       };
 
+      // AuthService exposes helpers that interact with the backend session endpoints.
       const AuthService = {
         async login(credentials) {
           const response = await fetch(`${API_BASE}/auth/login`, {
@@ -410,6 +416,7 @@
         },
       };
 
+      // Shared helper for JSON-based API requests that include session cookies.
       const fetchWithJson = async (path, options = {}) => {
         const response = await fetch(`${API_BASE}${path}`, {
           credentials: 'include',
@@ -420,6 +427,7 @@
         return { response, payload };
       };
 
+      // Presentational component that renders login inputs and enforces required fields.
       const LoginForm = ({ onSubmit, disabled }) => {
         const [username, setUsername] = useState('');
         const [password, setPassword] = useState('');
@@ -470,6 +478,7 @@
         );
       };
 
+      // Shared component for creating or updating tasks while validating form inputs.
       const TaskForm = ({ defaultValues = DEFAULT_FORM, onSave, onCancel, disabled, submitLabel, resetOnSave }) => {
         const [title, setTitle] = useState(defaultValues.title);
         const [description, setDescription] = useState(defaultValues.description);
@@ -539,6 +548,7 @@
         );
       };
 
+      // Visual component that renders task cards and wires up completion, edit, and delete actions.
       const TodoList = ({ tasks, onToggle, onEdit, onDelete }) => {
         if (!tasks.length) {
           return React.createElement('p', { className: 'empty-state' }, "You don't have tasks yet. Use the form above to add your first item.");
@@ -581,6 +591,7 @@
         );
       };
 
+      // The root component that orchestrates service calls, authentication state, and UI sections.
       const App = () => {
         const [todos, setTodos] = useState([]);
         const [filter, setFilter] = useState('all');
@@ -888,6 +899,7 @@
         );
       };
 
+      // Mount the React component tree into the static page container.
       createRoot(document.querySelector('#root')).render(React.createElement(App));
     </script>
   </body>

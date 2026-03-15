@@ -1,5 +1,6 @@
 import { request} from "@playwright/test";
 
+// globalSetup authenticates via REST before Playwright tests run and saves the resulting storage state.
 async function globalSetup() {
 
     // const browser = await chromium.launch();
@@ -19,6 +20,7 @@ async function globalSetup() {
     //     path : "storageState.json"
     // })
 
+    // Use the API to create the authenticated session instead of relying on the UI flow.
     const requestContext = await request.newContext();
     await requestContext.post("https://todo.qacart.com/api/v1/users/login",{
         data:{
@@ -27,6 +29,7 @@ async function globalSetup() {
         }
     })
 
+    // Persist the storage state so UI tests begin with a logged-in context.
     await requestContext.storageState({
         path : "storageState.json"
     })

@@ -1,5 +1,6 @@
 from typing import Dict
 
+# In-memory fixture of valid user accounts for the demo environment.
 USERS = [
     {
         "id": "user-1",
@@ -17,6 +18,8 @@ USERS = [
 
 
 def authenticate_user(username: str, password: str) -> Dict[str, str] | None:
+    """Verify credentials and return a safe user payload when they match."""
+
     normalized = username.strip().lower()
     candidate = next(
         (
@@ -29,6 +32,7 @@ def authenticate_user(username: str, password: str) -> Dict[str, str] | None:
     if not candidate:
         return None
 
+    # Only expose limited user data once authentication succeeds.
     return {
         "id": candidate["id"],
         "username": candidate["username"],
@@ -37,6 +41,8 @@ def authenticate_user(username: str, password: str) -> Dict[str, str] | None:
 
 
 def get_user_from_session(session_data: dict) -> Dict[str, str] | None:
+    """Return a normalized user payload if the session already stores one."""
+
     user = session_data.get("user")
     if not isinstance(user, dict):
         return None

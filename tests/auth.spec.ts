@@ -3,8 +3,10 @@ import { test, expect } from '@playwright/test';
 const API_BASE = process.env.APP_API_BASE ?? 'http://127.0.0.1:5000/api';
 const CREDENTIALS = { username: 'demo', password: 'demo123' };
 
+// Authentication API contract tests covering login, status checks, and logout behavior.
 test.describe('authentication API', () => {
   test('allows login with valid credentials and returns the user payload', async ({ request }) => {
+    // Send a login request with known credentials and assert the success payload.
     const response = await request.post(`${API_BASE}/auth/login`, { data: CREDENTIALS });
 
     expect(response.status()).toBe(200);
@@ -19,6 +21,7 @@ test.describe('authentication API', () => {
   });
 
   test('returns 401 status if no session exists when checking auth status', async ({ request }) => {
+    // Request the status endpoint without an authenticated session to ensure it rejects.
     const response = await request.get(`${API_BASE}/auth/status`);
 
     expect(response.status()).toBe(401);
@@ -29,6 +32,7 @@ test.describe('authentication API', () => {
   });
 
   test('enforces logout by clearing the existing session', async ({ request }) => {
+    // Use a dedicated context to log in, verify status, log out, and then assert the session is cleared.
     const context = await request.newContext();
 
     const loginResponse = await context.post(`${API_BASE}/auth/login`, { data: CREDENTIALS });
