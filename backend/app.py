@@ -41,6 +41,18 @@ else:
         "true",
         "yes",
     }
+session_cookie_samesite_env = os.environ.get("FLASK_SESSION_COOKIE_SAMESITE", "None")
+session_cookie_samesite = (session_cookie_samesite_env or "None").strip()
+if not session_cookie_samesite:
+    session_cookie_samesite = "None"
+session_cookie_secure_env = os.environ.get("FLASK_SESSION_COOKIE_SECURE", "False")
+session_cookie_secure = str(session_cookie_secure_env).lower() in {
+    "1",
+    "true",
+    "yes",
+}
+if session_cookie_samesite.lower() == "none":
+    session_cookie_secure = True
 
 app.config.update(
     {
@@ -62,6 +74,8 @@ def login_required(view):
         if not session.get(SESSION_USER_KEY):
             abort(401, description="Authentication is required to access this resource.")
         return view(*args, **kwargs)
+app.config["SESSION_COOKIE_SAMESITE"] = session_cookie_samesite
+app.config["SESSION_COOKIE_HTTPONLY"] = True
 
 CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
