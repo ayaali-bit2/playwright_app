@@ -31,6 +31,16 @@ frontend_origins = [
     if origin.strip()
 ]
 session_cookie_name = os.environ.get("FLASK_SESSION_COOKIE_NAME", "session")
+session_cookie_samesite = os.environ.get("FLASK_SESSION_COOKIE_SAMESITE", "Lax")
+session_cookie_secure_env = os.environ.get("FLASK_SESSION_COOKIE_SECURE")
+if session_cookie_secure_env is None:
+    session_cookie_secure = True
+else:
+    session_cookie_secure = session_cookie_secure_env.strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }
 session_cookie_samesite_env = os.environ.get("FLASK_SESSION_COOKIE_SAMESITE", "None")
 session_cookie_samesite = (session_cookie_samesite_env or "None").strip()
 if not session_cookie_samesite:
