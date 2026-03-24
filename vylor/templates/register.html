@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Register | Vylor AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        :root {
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: #eef0ff;
+            background-color: #030512;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at top, rgba(119, 153, 255, 0.35), transparent 45%),
+                linear-gradient(180deg, #030512 0%, #111833 60%, #0c0f1c 100%);
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+        }
+
+        .page {
+            width: min(1100px, 100%);
+            padding: 4rem 1.5rem 3rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 3rem;
+        }
+
+        .hero {
+            align-self: center;
+        }
+
+        .hero .eyebrow {
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            font-size: 0.75rem;
+            color: #8ab2ff;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 {
+            margin: 0 0 0.8rem;
+            font-size: clamp(2.6rem, 4vw, 3.5rem);
+            line-height: 1.1;
+        }
+
+        .hero p {
+            margin: 0;
+            color: #b7bdd7;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        .panel {
+            background: rgba(9, 12, 24, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            padding: 2.25rem;
+            box-shadow: 0 25px 65px rgba(3, 5, 12, 0.55);
+            backdrop-filter: blur(16px);
+        }
+
+        .panel h2 {
+            margin-top: 0;
+            margin-bottom: 0.35rem;
+            font-size: 1.8rem;
+        }
+
+        .panel p {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: #b7bdd7;
+            line-height: 1.5;
+        }
+
+        form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            color: rgba(255, 255, 255, 0.65);
+        }
+
+        .field input,
+        .field textarea {
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.03);
+            color: inherit;
+            font-size: 1rem;
+            padding: 0.95rem 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .field input:focus,
+        .field textarea:focus {
+            border-color: rgba(114, 147, 255, 0.65);
+            box-shadow: 0 0 0 3px rgba(114, 147, 255, 0.25);
+            outline: none;
+        }
+
+        .field textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        button {
+            margin-top: 0.5rem;
+            border: none;
+            border-radius: 14px;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: white;
+            background: linear-gradient(135deg, #6ba3ff, #6c63ff);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: wait;
+        }
+
+        button:not(:disabled):hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 24px rgba(109, 99, 255, 0.35);
+        }
+
+        .status {
+            min-height: 2em;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+
+        .status.info {
+            color: #b8c6ff;
+        }
+
+        .status.success {
+            color: #8ef2c7;
+        }
+
+        .status.error {
+            color: #ffb4ab;
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                padding: 3rem 1rem 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <section class="hero">
+            <p class="eyebrow">Early access</p>
+            <h1>Register your workspace with Vylor</h1>
+            <p>
+                Share your organization details, team size, and why you need Vylor. We'll reserve a spot for
+                you on the platform and reach out with next steps.
+            </p>
+        </section>
+        <section class="panel">
+            <h2>Request access</h2>
+            <p>We process every registration manually to ensure we can match you with the right experience.</p>
+            <form id="registrationForm">
+                <div class="field">
+                    <label for="organization_name">Organization name</label>
+                    <input
+                        id="organization_name"
+                        name="organization_name"
+                        type="text"
+                        required
+                        placeholder="Example: Vylor Labs"
+                        autocomplete="organization"
+                    />
+                </div>
+                <div class="field">
+                    <label for="organization_key">Organization key</label>
+                    <input
+                        id="organization_key"
+                        name="organization_key"
+                        type="text"
+                        required
+                        placeholder="example-workspace"
+                        autocomplete="off"
+                    />
+                </div>
+                <div class="field">
+                    <label for="owner_name">Primary contact</label>
+                    <input
+                        id="owner_name"
+                        name="owner_name"
+                        type="text"
+                        required
+                        placeholder="Full name"
+                        autocomplete="name"
+                    />
+                </div>
+                <div class="field">
+                    <label for="owner_email">Primary contact email</label>
+                    <input
+                        id="owner_email"
+                        name="owner_email"
+                        type="email"
+                        required
+                        placeholder="name@company.com"
+                        autocomplete="email"
+                    />
+                </div>
+                <div class="field">
+                    <label for="contact_email">Alternative contact email</label>
+                    <input
+                        id="contact_email"
+                        name="contact_email"
+                        type="email"
+                        placeholder="secondary@company.com"
+                        autocomplete="email"
+                    />
+                </div>
+                <div class="field">
+                    <label for="team_size">Team size</label>
+                    <input
+                        id="team_size"
+                        name="team_size"
+                        type="number"
+                        min="1"
+                        placeholder="8"
+                        autocomplete="off"
+                    />
+                </div>
+                <div class="field">
+                    <label for="notes">Notes / goals</label>
+                    <textarea
+                        id="notes"
+                        name="notes"
+                        placeholder="Tell us what you want to build with Vylor."
+                    ></textarea>
+                </div>
+                <button type="submit">Submit request</button>
+            </form>
+            <div id="formStatus" class="status info" role="status" aria-live="polite"></div>
+        </section>
+    </div>
+    <script>
+        (function () {
+            const form = document.getElementById("registrationForm");
+            const statusEl = document.getElementById("formStatus");
+            const submitButton = form.querySelector("button[type='submit']");
+
+            const serializePayload = () => ({
+                organization_name: form.organization_name.value.trim(),
+                organization_key: form.organization_key.value.trim(),
+                owner_name: form.owner_name.value.trim(),
+                owner_email: form.owner_email.value.trim(),
+                contact_email:
+                    form.contact_email.value.trim() || form.owner_email.value.trim(),
+                team_size: form.team_size.value.trim(),
+                notes: form.notes.value.trim(),
+            });
+
+            const updateStatus = (message, tone = "info") => {
+                statusEl.textContent = message;
+                statusEl.classList.remove("info", "success", "error");
+                statusEl.classList.add(tone);
+            };
+
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                const payload = serializePayload();
+                updateStatus("Sending your request…", "info");
+                submitButton.disabled = true;
+                try {
+                    const response = await fetch("/api/register", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload),
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        updateStatus(
+                            data.message || "Thanks! We'll be in touch shortly.",
+                            "success",
+                        );
+                        form.reset();
+                    } else {
+                        updateStatus(data.error || "Unable to submit your request.", "error");
+                    }
+                } catch (error) {
+                    updateStatus(
+                        "A network error occurred. Please check your connection and try again.",
+                        "error",
+                    );
+                } finally {
+                    submitButton.disabled = false;
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
