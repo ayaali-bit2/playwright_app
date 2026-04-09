@@ -1,4 +1,9 @@
-import { request} from "@playwright/test";
+import path from "path";
+import dotenv from "dotenv";
+
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
+import { request } from "@playwright/test";
 
 async function globalSetup() {
 
@@ -22,13 +27,13 @@ async function globalSetup() {
     const requestContext = await request.newContext();
     await requestContext.post("https://todo.qacart.com/api/v1/users/login",{
         data:{
-            email: "ayaali20@gmail.com",
-            password: "Aya123ali@"
+            email: process.env.USER_EMAIL,
+            password: process.env.USER_PASSWORD
         }
     })
 
     await requestContext.storageState({
-        path : "storageState.json"
+        path: path.resolve(__dirname, "../tests/storageState.json"),
     })
 }
 
