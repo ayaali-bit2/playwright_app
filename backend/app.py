@@ -20,7 +20,6 @@ DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
 app = Flask(__name__)
-app.secret_key = "vylor-demo-secret"
 app.config["JSON_SORT_KEYS"] = False
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-insecure-secret")
 
@@ -53,7 +52,9 @@ app.config.update(
         "SESSION_REFRESH_EACH_REQUEST": True,
     }
 )
+
 CORS(app, supports_credentials=True, origins=frontend_origins or _default_origins)
+app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
 SESSION_USER_KEY = "user"
 
@@ -64,17 +65,14 @@ def login_required(view):
         if not session.get(SESSION_USER_KEY):
             abort(401, description="Authentication is required to access this resource.")
         return view(*args, **kwargs)
-app.config["SESSION_COOKIE_SAMESITE"] = session_cookie_samesite
-app.config["SESSION_COOKIE_HTTPONLY"] = True
 
-CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
-app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    return wrapper
 
 
 def require_session(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if not session.get("user"):
+        if not session.get(SESSION_USER_KEY):
             abort(401, description="Authentication required")
         return func(*args, **kwargs)
 
