@@ -1,26 +1,32 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
-test.describe("todo application", ()=>{
+// Helper Functions
+async function openLoginPage(page: Page) {
+    await page.goto("https://todo.qacart.com/login");
+}
+
+async function getWelcomeMessage(page: Page) {
+    return page.locator('[data-testid="welcome"]');
+}
+
+async function verifyWelcomeMessage(page: Page) {
+    const welcomeMessage = await getWelcomeMessage(page);
+    await expect(welcomeMessage).toBeVisible();
+}
+
+test.describe("todo application", () => {
 
     test.use({
         storageState: "storageState.json"
-    })
-    test.beforeEach("open the website and login", async({page}) =>{
-        await page.goto("https://todo.qacart.com/login");
-        
-    })
+    });
 
+    test.beforeEach("open the website", async ({ page }) => {
+        await openLoginPage(page);
+    });
 
-
-    test("checking welcome message is displayed or not", async ({page}) =>{
-
+    test("checking welcome message is displayed or not", async ({ page }) => {
         await page.pause();
-        const welcomeMessage = page.locator('[data-testid="welcome"]');
-        await expect(welcomeMessage).toBeVisible();
-    })
+        await verifyWelcomeMessage(page);
+    });
 
-
-})
-    
-
-
+});
