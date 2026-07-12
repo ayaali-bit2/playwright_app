@@ -6,16 +6,6 @@ function incrementRunCount() {
   return runCount;
 }
 
-function formatSummary(userName) {
-  const timestamp = new Date().toISOString();
-  return `${projectName} - ${userName} - ${timestamp}`;
-}
-
-const createGreeter = (name) => {
-  const safeName = String(name).trim() || "Guest";
-  return `Hello, ${safeName}!`;
-};
-
 const add = (a, b) => a + b;
 
 const buildReport = (items) => {
@@ -30,8 +20,6 @@ module.exports = {
   projectName,
   runCount,
   incrementRunCount,
-  formatSummary,
-  createGreeter,
   add,
   buildReport,
 };
