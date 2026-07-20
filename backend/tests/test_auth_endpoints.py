@@ -9,6 +9,7 @@ AUTH_BASE = "/api/auth"
 @pytest.fixture(autouse=True)
 def reset_users():
     original_users = [user.copy() for user in controller.USERS]
+    print("original_users:", original_users)
     yield
     controller.USERS[:] = original_users
 
