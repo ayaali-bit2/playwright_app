@@ -6,7 +6,7 @@ function incrementRunCount() {
   return runCount;
 }
 
-const add = (a, b) => a + b;
+
 
 const buildReport = (items) => {
   const normalizedItems = Array.isArray(items) ? items : [];
