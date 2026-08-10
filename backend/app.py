@@ -69,14 +69,12 @@ def login_required(view):
     return wrapper
 
 
-def require_session(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        if not session.get(SESSION_USER_KEY):
-            abort(401, description="Authentication required")
-        return func(*args, **kwargs)
-
-    return wrapper
+def _current_user_id() -> str | None:
+    user = session.get(SESSION_USER_KEY)
+    if not isinstance(user, dict):
+        return None
+    user_id = user.get("id")
+    return user_id if isinstance(user_id, str) and user_id else None
 
 
 def read_todos() -> List[Dict[str, Any]]:
@@ -96,8 +94,11 @@ def persist_todos(todos: List[Dict[str, Any]]) -> None:
         json.dump(todos, handle, indent=2)
 
 
-def find_todo(todos: List[Dict[str, Any]], todo_id: str) -> Dict[str, Any] | None:
-    return next((item for item in todos if item["id"] == todo_id), None)
+def find_todo(todos: List[Dict[str, Any]], todo_id: str, user_id: str) -> Dict[str, Any] | None:
+    return next(
+        (item for item in todos if item.get("id") == todo_id and item.get("user_id") == user_id),
+        None,
+    )
 
 
 def _resolve_username(payload: Dict[str, Any]) -> str | None:
@@ -134,14 +135,14 @@ def clear_session() -> Any:
 
 @app.route("/api/todos", methods=["GET"])
 @login_required
-@require_session
 def list_todos() -> Any:
-    return jsonify(read_todos())
+    user_id = _current_user_id()
+    todos = [item for item in read_todos() if item.get("user_id") == user_id]
+    return jsonify(todos)
 
 
 @app.route("/api/todos", methods=["POST"])
 @login_required
-@require_session
 def create_todo() -> Any:
     payload = request.get_json(silent=True) or {}
     title = (payload.get("title") or "").strip()
@@ -149,9 +150,11 @@ def create_todo() -> Any:
         return jsonify({"message": "Title is required."}), 400
 
     description = (payload.get("description") or "").strip()
+    user_id = _current_user_id()
     todos = read_todos()
     new_task = {
         "id": str(uuid4()),
+        "user_id": user_id,
         "title": title,
         "description": description,
         "completed": False,
@@ -163,11 +166,11 @@ def create_todo() -> Any:
 
 @app.route("/api/todos/<todo_id>", methods=["PUT"])
 @login_required
-@require_session
 def update_todo(todo_id: str) -> Any:
     payload = request.get_json(silent=True) or {}
+    user_id = _current_user_id()
     todos = read_todos()
-    todo = find_todo(todos, todo_id)
+    todo = find_todo(todos, todo_id, user_id)
     if not todo:
         abort(404, description="Task not found")
 
@@ -187,13 +190,14 @@ def update_todo(todo_id: str) -> Any:
 
 @app.route("/api/todos/<todo_id>", methods=["DELETE"])
 @login_required
-@require_session
 def delete_todo(todo_id: str) -> Any:
+    user_id = _current_user_id()
     todos = read_todos()
-    filtered = [item for item in todos if item["id"] != todo_id]
-    if len(filtered) == len(todos):
+    todo = find_todo(todos, todo_id, user_id)
+    if not todo:
         abort(404, description="Task not found")
 
+    filtered = [item for item in todos if item.get("id") != todo_id]
     persist_todos(filtered)
     return jsonify({"message": "Task deleted."})
 

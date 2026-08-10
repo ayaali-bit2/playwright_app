@@ -1,12 +1,17 @@
 import {test,expect} from '@playwright/test'
 
+const BASE_URL = process.env.APP_BASE_URL ?? 'https://todo.qacart.com';
+const TEST_EMAIL = process.env.APP_TEST_EMAIL ?? 'ayaali20@gmail.com';
+const TEST_PASSWORD = process.env.APP_TEST_PASSWORD ?? 'Aya123ali@';
+const TEST_FIRST_NAME = process.env.APP_TEST_FIRST_NAME ?? 'Aya';
+
 test("should be able to login using api", async ({request}) =>{
 
-    const apiReq = await request.post("https://todo.qacart.com/api/v1/users/login",
+    const apiReq = await request.post(`${BASE_URL}/api/v1/users/login`,
         {data:
             {
-                email: "ayaali20@gmail.com",
-                password: "Aya123ali@"
+                email: TEST_EMAIL,
+                password: TEST_PASSWORD
             }
         }
     )
@@ -16,5 +21,5 @@ test("should be able to login using api", async ({request}) =>{
 
     //console.log(await apiReq.json());
     await expect(apiReq.ok).toBeTruthy();
-    await expect(await apiReq.json()).toHaveProperty("firstName","Aya")
+    await expect(await apiReq.json()).toHaveProperty("firstName", TEST_FIRST_NAME)
 })

@@ -3,17 +3,19 @@ from __future__ import annotations
 from typing import Dict
 from uuid import uuid4
 
+from werkzeug.security import check_password_hash, generate_password_hash
+
 USERS = [
     {
         "id": "user-1",
         "username": "demo",
-        "password": "demo123",
+        "password_hash": generate_password_hash("demo123"),
         "display_name": "Demo User",
     },
     {
         "id": "user-2",
         "username": "tester",
-        "password": "tester123",
+        "password_hash": generate_password_hash("tester123"),
         "display_name": "Playwright Tester",
     },
 ]
@@ -34,14 +36,10 @@ def _to_public_user(user: dict) -> Dict[str, str]:
 def authenticate_user(username: str, password: str) -> Dict[str, str] | None:
     normalized = _normalize_username(username)
     candidate = next(
-        (
-            user
-            for user in USERS
-            if user["username"] == normalized and user["password"] == password
-        ),
+        (user for user in USERS if user["username"] == normalized),
         None,
     )
-    if not candidate:
+    if not candidate or not check_password_hash(candidate["password_hash"], password):
         return None
     return _to_public_user(candidate)
 
@@ -55,7 +53,7 @@ def register_user(username: str, password: str, display_name: str) -> tuple[Dict
     created = {
         "id": f"user-{uuid4()}",
         "username": normalized,
-        "password": password,
+        "password_hash": generate_password_hash(password),
         "display_name": display_name.strip(),
     }
     USERS.append(created)
