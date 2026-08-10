@@ -36,7 +36,6 @@ test.describe("todo application", () => {
     });
 
     test("checking welcome message is displayed or not", async ({ page }) => {
-        await page.pause();
         await verifyWelcomeMessage(page);
     });
 
